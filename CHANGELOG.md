@@ -6,4 +6,8 @@ Notable changes to `go-smapiweb`. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- `Client.Index` and `Client.Page` read the StardewModDataset: which Nexus pages ship a UniqueID, and a page's files, manifests and dependencies. A page the dataset lacks is an empty `Page`.
+
 [Unreleased]: https://github.com/Rethunk-Tech/go-smapiweb/commits/main
