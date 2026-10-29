@@ -11,8 +11,10 @@
 
 A client for the web services of the Stardew Valley modding toolchain: smapi.io's mod update API and log parser, the SMAPI compatibility list and the StardewModDataset. Package `smapiweb`, module `github.com/Rethunk-Tech/go-smapiweb`.
 
-<!-- scaffold: one short paragraph on what the package guarantees and why it exists, in plain
-words. -->
+The services publish no client for Go and answer in shapes that drift. This package sends the requests, bounds every
+body it reads, and parses leniently. It caches nothing: the `Updates` result says which mods were answered, so a
+caller keeps its own cache and decides when an answer is too old. The JSON tags on the result and dataset types are a
+format contract, so cached copies survive an upgrade.
 
 ## Quick start
 
@@ -24,7 +26,11 @@ A worked example and the contracts: [HUMANS.md](HUMANS.md).
 
 ## Features
 
-<!-- scaffold: 3 to 6 bullets, each a capability a caller can rely on. No roadmap. -->
+- `Updates`: newest and unofficial versions and compatibility for any number of mods, batched, with per-mod `Known`.
+- `CompatList`: the SMAPI compatibility list in every shape it has been published in, with `Lookup` and `BrokenOn`.
+- `Index` and `Page`: which Nexus pages ship a UniqueID, and a page's files, manifests and dependencies.
+- `UploadLog`: share a SMAPI log through smapi.io and get its public link.
+- Every response is read under a size cap and a deadline.
 
 ## Documentation
 

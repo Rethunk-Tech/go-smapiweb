@@ -14,10 +14,19 @@ Please do not open a public issue for a suspected vulnerability first.
 
 ## What is in scope
 
-<!-- scaffold: the untrusted inputs this package handles, and each property a crafted input must not
-break (an escape, an unbounded allocation, a panic). One bullet each, naming the API. -->
+Every answer from smapi.io and raw.githubusercontent.com is untrusted, and so is whoever sits between.
+
+- `Updates`, `CompatList`, `Index` and `Page` read a response body: it must never be read past its cap (16, 16, 32
+  and 8 MiB), and a crafted document must not panic a parser or put an empty key in a result. Fuzz targets cover each
+  parser.
+- `Page` must never return a file name that holds a path separator, so a caller can use it as a file name.
+- `UploadLog` follows no redirect and rebuilds the link from the redirect's scheme and host with the id
+  path-escaped and slash-free, so a hostile `Location` cannot return a link to another path or inject one.
+- Update answers must never alter the request's mod IDs: results carry the caller's IDs.
 
 ## What is out of scope
 
-<!-- scaffold: what the caller is trusted to have checked already, and behaviour that is intended
-rather than a vulnerability. -->
+- Trust in the services themselves: a hostile smapi.io can say a mod has an update, with any URL. Callers decide
+  whether to follow the `Update.URL` and `UnofficialURL` they get back.
+- The endpoints a caller configures on `Client` are trusted; there is no allowlist.
+- TLS and proxies are the `http.Client`'s business.
