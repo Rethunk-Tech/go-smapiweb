@@ -1,6 +1,7 @@
 package smapiweb
 
 import (
+	"encoding/json"
 	"strings"
 	"testing"
 )
@@ -46,6 +47,42 @@ func FuzzParsePage(f *testing.F) {
 					}
 				}
 			}
+		}
+	})
+}
+
+// FuzzParseCompat feeds the SMAPI compatibility list.
+func FuzzParseCompat(f *testing.F) {
+	f.Add([]byte(compatSample))
+	f.Add([]byte(`{"mods":[{"id":[1,"a, b"],"nexus":"x"}]}`))
+	f.Add([]byte(`[{"id":"A.One","nexus":10,"github":"Me/One"},{"id":"B.Two","github":"me/one"}]`))
+	f.Fuzz(func(t *testing.T, raw []byte) {
+		idx, err := parseCompatJSON(raw)
+		if err != nil {
+			return
+		}
+		for k := range idx.ByID {
+			if k == "" || k != strings.ToLower(k) {
+				t.Fatalf("ByID key %q is empty or not lowercased", k)
+			}
+		}
+		for n, id := range idx.NexusToID {
+			if id == "" {
+				t.Fatalf("Nexus page %d ties to no id", n)
+			}
+		}
+		for repo, id := range idx.GitHubToID {
+			if id == "" {
+				t.Fatalf("repository %q ties to no id", repo)
+			}
+		}
+		b, err := json.Marshal(idx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var back CompatIndex
+		if err := json.Unmarshal(b, &back); err != nil {
+			t.Fatalf("the index does not survive its own encoding: %v", err)
 		}
 	})
 }
