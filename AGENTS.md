@@ -18,8 +18,8 @@ cannot resolve that check from PATH.
   outlives the call. The joined error holds only real failures, never an unsent batch, so its first element is
   always a transport or status error.
 - **Every read goes through `Client.do`**: a 20 s deadline and `httpkit.DoCapped`, so a body over its cap is an error
-  rather than an allocation. The caps (16 MiB update answer and compatibility list, 32 MiB index, 8 MiB page) are about
-  17 times the live sizes and stay unexported; a caller wanting a shorter deadline passes a context.
+  rather than an allocation. The caps (16 MiB update answer and compatibility list, 32 MiB index, 8 MiB page) sit well above
+  the live sizes and stay unexported; a caller wanting a shorter deadline passes a context.
 - **Parsers are lenient on purpose.** The upstream files are hand-edited or written by other tools: a field of the
   wrong type keeps the rest of the record, and `parse.go`, `entryFromRaw` and `decodeUpdateAnswers` never panic.
   Fuzz targets assert that.
