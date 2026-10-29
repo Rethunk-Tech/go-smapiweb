@@ -86,3 +86,26 @@ func FuzzParseCompat(f *testing.F) {
 		}
 	})
 }
+
+// FuzzUpdateAnswer feeds smapi.io's answer to an update check.
+func FuzzUpdateAnswer(f *testing.F) {
+	seedFile(f, "smapi-mods.json")
+	f.Add([]byte(`[null,{"id":3,"suggestedUpdate":{"version":[]}}]`))
+	f.Add([]byte(`[{"id":"A.B","suggestedUpdate":{"version":" "},"metadata":{"unofficial":{"version":"1"}}}]`))
+	f.Fuzz(func(t *testing.T, raw []byte) {
+		got, err := decodeUpdateAnswers(raw)
+		if err != nil {
+			return
+		}
+		for k, r := range got {
+			if k != strings.ToLower(k) {
+				t.Fatalf("key %q is not lowercased", k)
+			}
+			for _, u := range []*Update{r.Suggested, r.Unofficial} {
+				if u != nil && strings.TrimSpace(u.Version) == "" {
+					t.Fatalf("an update with a blank version was kept: %+v", r)
+				}
+			}
+		}
+	})
+}
