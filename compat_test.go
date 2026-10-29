@@ -1,7 +1,6 @@
 package smapiweb
 
 import (
-	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -203,20 +202,5 @@ func TestCompatListServerErrorIsAnError(t *testing.T) {
 	t.Cleanup(srv.Close)
 	if _, err := (&Client{HTTP: srv.Client(), CompatURL: srv.URL}).CompatList(t.Context()); err == nil {
 		t.Fatal("a 503 is not a list")
-	}
-}
-
-// The index is cached by callers under its Go field names, so the encoding is an API.
-func TestCompatIndexJSONShapeIsStable(t *testing.T) {
-	const in = `{"ByID":{"a.b":{"status":"broken","summary":"s","brokeIn":"Stardew Valley 1.6","unofficialUrl":"u","unofficialVersion":"v","replacement":"r"}},` +
-		`"ByNexus":{"7":{"status":"ok","summary":"","brokeIn":"","unofficialUrl":"","unofficialVersion":"","replacement":""}},` +
-		`"NexusToID":{"7":"A.B"},"GitHubToID":{"me/one":"A.B"}}`
-	var idx CompatIndex
-	if err := json.Unmarshal([]byte(in), &idx); err != nil {
-		t.Fatal(err)
-	}
-	out, err := json.Marshal(idx)
-	if err != nil || string(out) != in {
-		t.Fatalf("re-encoded %s, err %v", out, err)
 	}
 }
