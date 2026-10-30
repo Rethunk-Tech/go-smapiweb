@@ -111,7 +111,7 @@ func parseIndex(b []byte) (map[string][]Ref, error) {
 // answered, it just does not know the page.
 func (c *Client) Page(ctx context.Context, id int) (Page, error) {
 	base := cmp.Or(c.PageBase, defaultPageBase)
-	u, err := url.JoinPath(base, strconv.Itoa(id/1000), strconv.Itoa(id)+".json")
+	u, err := url.JoinPath(base, url.PathEscape(strconv.Itoa(id/1000)), url.PathEscape(strconv.Itoa(id)+".json"))
 	if err != nil {
 		return Page{}, err
 	}
