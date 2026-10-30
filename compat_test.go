@@ -1,6 +1,7 @@
 package smapiweb
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -202,5 +203,23 @@ func TestCompatListServerErrorIsAnError(t *testing.T) {
 	t.Cleanup(srv.Close)
 	if _, err := (&Client{HTTP: srv.Client(), CompatURL: srv.URL}).CompatList(t.Context()); err == nil {
 		t.Fatal("a 503 is not a list")
+	}
+}
+
+func TestReplacementOfReadsEveryShapeTheListUses(t *testing.T) {
+	t.Parallel()
+	for raw, want := range map[string]string{
+		``:                       "",
+		`" Other Mod "`:          "Other Mod",
+		`{"name":"","id":" x "}`: "x",
+		`{"url":"https://u"}`:    "https://u",
+		`{"name":" "}`:           "",
+		`[" first ","second"]`:   "first",
+		`[]`:                     "",
+		`7`:                      "",
+	} {
+		if got := replacementOf(json.RawMessage(raw)); got != want {
+			t.Errorf("%s: %q, want %q", raw, got, want)
+		}
 	}
 }
