@@ -38,7 +38,7 @@ require (
 	github.com/Masterminds/semver/v3 v3.5.0 // indirect
 	github.com/MirrexOne/unqueryvet v1.5.4 // indirect
 	github.com/OpenPeeDeeP/depguard/v2 v2.2.1 // indirect
-	github.com/Rethunk-Tech/go-safefs v0.2.0 // indirect
+	github.com/Rethunk-Tech/go-safefs v0.6.0 // indirect
 	github.com/alecthomas/chroma/v2 v2.27.0 // indirect
 	github.com/alecthomas/go-check-sumtype v0.5.1-0.20260828200218-ae6904d28606 // indirect
 	github.com/alexkohler/nakedret/v2 v2.0.6 // indirect
@@ -105,7 +105,7 @@ require (
 	github.com/golangci/misspell v0.8.0 // indirect
 	github.com/golangci/plugin-module-register v0.1.2 // indirect
 	github.com/golangci/revgrep v0.8.0 // indirect
-	github.com/golangci/rowserrcheck v0.0.0-20261101185801-5eae6341f100 // indirect
+	github.com/golangci/rowserrcheck v0.0.0-20261101210309-7f680fea35ce // indirect
 	github.com/golangci/swaggoswag v0.0.0-20250504205917-77f2aca3143e // indirect
 	github.com/golangci/unconvert v0.0.0-20250410112200-a129a6e6413e // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
@@ -115,7 +115,6 @@ require (
 	github.com/gostaticanalysis/forcetypeassert v0.2.0 // indirect
 	github.com/gostaticanalysis/nilerr v0.1.2 // indirect
 	github.com/hashicorp/go-immutable-radix/v2 v2.1.0 // indirect
-	github.com/hashicorp/go-uuid v1.0.4 // indirect
 	github.com/hashicorp/go-version v1.9.0 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/hexops/gotextdiff v1.0.3 // indirect
@@ -225,5 +224,5 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	honnef.co/go/tools v0.8.2 // indirect
 	mvdan.cc/gofumpt v0.12.0 // indirect
-	mvdan.cc/unparam v0.0.0-20261011093844-7a2c2c0b7aa6 // indirect
+	mvdan.cc/unparam v0.0.0-20261102141913-394cd0a56cd5 // indirect
 )
