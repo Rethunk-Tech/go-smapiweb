@@ -212,33 +212,7 @@ func entryFromRaw(raw rawCompatMod) CompatEntry {
 		UnofficialURL: strings.TrimSpace(raw.UnofficialURL),
 		Replacement:   replacementOf(raw.Replacement),
 	}
-	if len(raw.Compatibility) > 0 {
-		var nested rawCompatBody
-		if json.Unmarshal(raw.Compatibility, &nested) == nil && (nested.Status != "" || nested.Summary != "") {
-			if s := normalizeCompatStatus(nested.Status); s != "" {
-				e.Status = s
-			}
-			if nested.Summary != "" {
-				e.Summary = strings.TrimSpace(nested.Summary)
-			}
-			if nested.BrokeIn != "" {
-				e.BrokeIn = strings.TrimSpace(nested.BrokeIn)
-			}
-			if nested.UnofficialURL != "" {
-				e.UnofficialURL = strings.TrimSpace(nested.UnofficialURL)
-			}
-			if r := replacementOf(nested.Replacement); r != "" {
-				e.Replacement = r
-			}
-		} else {
-			var status string
-			if json.Unmarshal(raw.Compatibility, &status) == nil {
-				if s := normalizeCompatStatus(status); s != "" {
-					e.Status = s
-				}
-			}
-		}
-	}
+	applyCompatibility(&e, raw.Compatibility)
 	if len(raw.UnofficialUpdate) > 0 {
 		var u struct {
 			URL     string `json:"url"`
@@ -264,6 +238,38 @@ func entryFromRaw(raw rawCompatMod) CompatEntry {
 		}
 	}
 	return e
+}
+
+// applyCompatibility overlays the "compatibility" field, an object with status and details or a bare status string.
+func applyCompatibility(e *CompatEntry, raw json.RawMessage) {
+	if len(raw) == 0 {
+		return
+	}
+	var nested rawCompatBody
+	if json.Unmarshal(raw, &nested) == nil && (nested.Status != "" || nested.Summary != "") {
+		if s := normalizeCompatStatus(nested.Status); s != "" {
+			e.Status = s
+		}
+		if nested.Summary != "" {
+			e.Summary = strings.TrimSpace(nested.Summary)
+		}
+		if nested.BrokeIn != "" {
+			e.BrokeIn = strings.TrimSpace(nested.BrokeIn)
+		}
+		if nested.UnofficialURL != "" {
+			e.UnofficialURL = strings.TrimSpace(nested.UnofficialURL)
+		}
+		if r := replacementOf(nested.Replacement); r != "" {
+			e.Replacement = r
+		}
+	} else {
+		var status string
+		if json.Unmarshal(raw, &status) == nil {
+			if s := normalizeCompatStatus(status); s != "" {
+				e.Status = s
+			}
+		}
+	}
 }
 
 const (
