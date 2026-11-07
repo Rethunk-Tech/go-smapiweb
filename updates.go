@@ -74,7 +74,7 @@ func (u *apiUpdate) asUpdate() *Update {
 	if u == nil || strings.TrimSpace(u.Version) == "" {
 		return nil
 	}
-	return &Update{Version: u.Version, URL: u.URL, Source: u.UpdateKey}
+	return &Update{Version: u.Version, URL: webURL(u.URL), Source: u.UpdateKey}
 }
 
 func firstUnofficial(parts ...*apiUpdate) *Update {

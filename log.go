@@ -73,6 +73,9 @@ func (c *Client) UploadLog(ctx context.Context, text string, maxBytes int) (stri
 	if err != nil {
 		return "", err
 	}
+	if abs.Scheme != res.Request.URL.Scheme || abs.Host != res.Request.URL.Host {
+		return "", fmt.Errorf("%w (redirected to another site)", ErrNoLogLink)
+	}
 	id, ok := strings.CutPrefix(abs.Path, "/log/")
 	if !ok || id == "" || strings.Contains(id, "/") {
 		return "", fmt.Errorf("%w (redirected to %q)", ErrNoLogLink, abs.Path)

@@ -209,7 +209,7 @@ func entryFromRaw(raw rawCompatMod) CompatEntry {
 		Status:        normalizeCompatStatus(raw.Status),
 		Summary:       strings.TrimSpace(raw.Summary),
 		BrokeIn:       strings.TrimSpace(raw.BrokeIn),
-		UnofficialURL: strings.TrimSpace(raw.UnofficialURL),
+		UnofficialURL: webURL(raw.UnofficialURL),
 		Replacement:   replacementOf(raw.Replacement),
 	}
 	applyCompatibility(&e, raw.Compatibility)
@@ -219,7 +219,7 @@ func entryFromRaw(raw rawCompatMod) CompatEntry {
 			Version string `json:"version"`
 		}
 		if json.Unmarshal(raw.UnofficialUpdate, &u) == nil {
-			e.UnofficialURL = cmp.Or(e.UnofficialURL, strings.TrimSpace(u.URL))
+			e.UnofficialURL = cmp.Or(e.UnofficialURL, webURL(u.URL))
 			e.UnofficialVersion = strings.TrimSpace(u.Version)
 		}
 	}
@@ -257,7 +257,7 @@ func applyCompatibility(e *CompatEntry, raw json.RawMessage) {
 			e.BrokeIn = strings.TrimSpace(nested.BrokeIn)
 		}
 		if nested.UnofficialURL != "" {
-			e.UnofficialURL = strings.TrimSpace(nested.UnofficialURL)
+			e.UnofficialURL = webURL(nested.UnofficialURL)
 		}
 		if r := replacementOf(nested.Replacement); r != "" {
 			e.Replacement = r

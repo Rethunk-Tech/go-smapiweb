@@ -3,6 +3,8 @@ package smapiweb
 import (
 	"context"
 	"net/http"
+	"net/url"
+	"strings"
 	"time"
 
 	"github.com/Rethunk-Tech/go-httpkit"
@@ -31,10 +33,33 @@ type Client struct {
 	LogURL string
 }
 
+// webURL is raw trimmed when it is an http or https address with a host, else empty: an answer's link is remote data
+// a caller may hand to a URL handler, which would launch other schemes' apps.
+func webURL(raw string) string {
+	raw = strings.TrimSpace(raw)
+	u, err := url.Parse(raw)
+	if err != nil || (u.Scheme != "https" && u.Scheme != "http") || u.Host == "" {
+		return ""
+	}
+	return raw
+}
+
+// redirectPolicy follows httpkit.NoDowngrade, and refuses a 307 or 308 to another origin: those re-send the request
+// body, which for the update API is the player's installed-mod list.
+func redirectPolicy(req *http.Request, via []*http.Request) error {
+	if err := httpkit.NoDowngrade(req, via); err != nil {
+		return err
+	}
+	if code := req.Response.StatusCode; (code == http.StatusTemporaryRedirect || code == http.StatusPermanentRedirect) && req.GetBody != nil {
+		return httpkit.SameOrigin(req, via)
+	}
+	return nil
+}
+
 // do sends req and returns at most limit bytes of a 200 response body, under requestTimeout. check is nil: none of
 // these hosts sends anything worth inspecting before the status test.
 func (c *Client) do(req *http.Request, limit int64) ([]byte, error) {
 	ctx, cancel := context.WithTimeout(req.Context(), requestTimeout)
 	defer cancel()
-	return httpkit.DoCapped(c.HTTP, req.WithContext(ctx), limit, nil)
+	return httpkit.DoCapped(httpkit.WithRedirect(c.HTTP, redirectPolicy), req.WithContext(ctx), limit, nil)
 }

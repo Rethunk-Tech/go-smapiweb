@@ -6,6 +6,14 @@ Notable changes to `go-smapiweb`. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- `UploadLog` refuses a `Location` on another scheme or host than the request.
+- `Update.URL`, `UnofficialURL` and an unofficial update's URL are kept only when they are http or https addresses.
+- A 307 or 308 redirect to another origin is refused, so the update ask's body is not re-sent there; an https-to-http redirect is refused.
+- `Page` blanks file names `.`, `..` and those holding a colon or control character, as it already did for separators.
+- `Index` keeps at most 64 distinct pages per UniqueID.
+
 ## [0.1.0] - 2026-10-29
 
 ### Added

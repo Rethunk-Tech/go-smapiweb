@@ -7,8 +7,10 @@ import (
 	"errors"
 	"net/http"
 	"net/url"
+	"slices"
 	"strconv"
 	"strings"
+	"unicode"
 
 	"github.com/Rethunk-Tech/go-httpkit"
 )
@@ -18,6 +20,9 @@ const (
 	defaultPageBase = "https://raw.githubusercontent.com/Pathoschild/StardewModDataset/main/dataset/data/Nexus"
 	maxIndex        = 32 << 20
 	maxPage         = 8 << 20
+	// maxRefsPerMod bounds the pages kept for one UniqueID: no mod ships from this many pages, and without a bound a
+	// 32 MiB index of short entries allocates several times its size.
+	maxRefsPerMod = 64
 )
 
 // Ref names a mod page: Site is "Nexus" or "CurseForge", as the dataset names it. Its JSON tags are a format
@@ -98,7 +103,10 @@ func parseIndex(b []byte) (map[string][]Ref, error) {
 			if !ok || err != nil || site == "" {
 				continue
 			}
-			out[key] = append(out[key], Ref{Site: site, ID: n})
+			ref := Ref{Site: site, ID: n}
+			if len(out[key]) < maxRefsPerMod && !slices.Contains(out[key], ref) {
+				out[key] = append(out[key], ref)
+			}
 		}
 	}
 	if len(out) == 0 {
@@ -131,10 +139,17 @@ func (c *Client) Page(ctx context.Context, id int) (Page, error) {
 	return p, err
 }
 
-// dropStoragePaths blanks a file name that is a storage path: it is never a name to save a file under.
+// plainFileName reports whether name can be a file's own name: not a dot entry, and free of path separators, drive
+// colons and control characters.
+func plainFileName(name string) bool {
+	return name != "." && name != ".." &&
+		!strings.ContainsAny(name, `/\:`) && !strings.ContainsFunc(name, unicode.IsControl)
+}
+
+// dropStoragePaths blanks a file name that is a storage path or otherwise not a name to save a file under.
 func dropStoragePaths(p *Page) {
 	for i := range p.Downloads {
-		if strings.ContainsAny(p.Downloads[i].FileName, `/\`) {
+		if !plainFileName(p.Downloads[i].FileName) {
 			p.Downloads[i].FileName = ""
 		}
 	}
