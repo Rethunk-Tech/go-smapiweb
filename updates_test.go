@@ -155,6 +155,31 @@ func TestAFailedBatchIsAskedAgainInHalves(t *testing.T) {
 	}
 }
 
+func TestUpdatesKeepsSuccessfulRetryHalf(t *testing.T) {
+	c := updatesClient(t, func(w http.ResponseWriter, r *http.Request) {
+		var body apiRequest
+		_ = json.NewDecoder(r.Body).Decode(&body)
+		if len(body.Mods) == 1 && body.Mods[0].ID == "A" {
+			_ = json.NewEncoder(w).Encode([]apiMod{{
+				ID:              "A",
+				SuggestedUpdate: &apiUpdate{Version: "2.0.0", URL: "https://example.com/a"},
+			}})
+			return
+		}
+		http.Error(w, "fail", http.StatusBadGateway)
+	})
+	got, err := c.Updates(t.Context(), UpdateRequest{Mods: []InstalledMod{{ID: "A"}, {ID: "B"}, {ID: "C"}}})
+	if err == nil {
+		t.Fatal("want error from failed half")
+	}
+	if len(got) != 3 || !got[0].Known || got[0].Suggested == nil || got[0].Suggested.Version != "2.0.0" {
+		t.Fatalf("mod A should be known after successful half, got %+v", got)
+	}
+	if got[1].Known || got[2].Known {
+		t.Fatalf("mods B and C should be unknown, got B=%+v C=%+v", got[1], got[2])
+	}
+}
+
 func TestAFailedBatchKeepsTheAnsweredOnesAndErrorsWithAJoin(t *testing.T) {
 	var asked atomic.Int32
 	c := updatesClient(t, func(w http.ResponseWriter, r *http.Request) {

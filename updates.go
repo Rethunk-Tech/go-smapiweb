@@ -118,13 +118,16 @@ func (c *Client) Updates(ctx context.Context, req UpdateRequest) ([]UpdateResult
 	answers := c.askBatches(ctx, req, batches)
 	var errs []error
 	for b, ans := range answers {
-		switch {
-		case ans.err != nil:
+		if ans.err != nil {
 			errs = append(errs, ans.err)
-		case ans.sent:
-			for j := range batches[b] {
-				i := b*updatesBatch + j
-				out[i] = ans.got[strings.ToLower(req.Mods[i].ID)]
+		}
+		if !ans.sent {
+			continue
+		}
+		for j := range batches[b] {
+			i := b*updatesBatch + j
+			if r, ok := ans.got[strings.ToLower(req.Mods[i].ID)]; ok {
+				out[i] = r
 				out[i].ID = req.Mods[i].ID
 				out[i].Known = true
 			}
@@ -177,16 +180,12 @@ func (c *Client) askUpdatesRetrying(ctx context.Context, req UpdateRequest, mods
 		return got, err
 	}
 	half := len(mods) / 2
-	first, err := c.askUpdates(ctx, req, mods[:half])
-	if err != nil {
-		return nil, err
-	}
-	second, err := c.askUpdates(ctx, req, mods[half:])
-	if err != nil {
-		return nil, err
-	}
-	maps.Copy(first, second)
-	return first, nil
+	first, err1 := c.askUpdates(ctx, req, mods[:half])
+	second, err2 := c.askUpdates(ctx, req, mods[half:])
+	got = map[string]UpdateResult{}
+	maps.Copy(got, first)
+	maps.Copy(got, second)
+	return got, errors.Join(err1, err2)
 }
 
 func (c *Client) askUpdates(ctx context.Context, req UpdateRequest, mods []InstalledMod) (map[string]UpdateResult, error) {
@@ -204,7 +203,17 @@ func (c *Client) askUpdates(ctx context.Context, req UpdateRequest, mods []Insta
 	if err != nil {
 		return nil, err
 	}
-	return decodeUpdateAnswers(b)
+	got, err := decodeUpdateAnswers(b)
+	if err != nil {
+		return nil, err
+	}
+	for _, m := range mods {
+		key := strings.ToLower(m.ID)
+		if _, ok := got[key]; !ok {
+			got[key] = UpdateResult{ID: m.ID, Known: true}
+		}
+	}
+	return got, nil
 }
 
 // decodeUpdateAnswers keys SMAPI's answer by lowercased mod ID.
