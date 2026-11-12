@@ -91,7 +91,7 @@ func parsePage(b []byte) (Page, error) {
 			return Page{}, err
 		}
 	}
-	p := Page{ID: int(r.ID), Name: string(r.Name), Author: string(r.Author), PageURL: string(r.PageURL), Version: string(r.Version)}
+	p := Page{ID: int(r.ID), Name: string(r.Name), Author: string(r.Author), PageURL: webURL(string(r.PageURL)), Version: string(r.Version)}
 	for _, d := range r.Downloads {
 		f := File{ID: d.ID, Type: string(d.Type), Version: string(d.Version), FileName: string(d.FileName), SizeInBytes: d.SizeInBytes}
 		for _, m := range d.Mods {
