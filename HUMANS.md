@@ -12,44 +12,44 @@ go get github.com/Rethunk-Tech/go-smapiweb
 package main
 
 import (
-	"context"
-	"fmt"
-	"log"
+ "context"
+ "fmt"
+ "log"
 
-	"github.com/Rethunk-Tech/go-smapiweb"
+ "github.com/Rethunk-Tech/go-smapiweb"
 )
 
 func main() {
-	var c smapiweb.Client // the zero value uses the public endpoints
+ var c smapiweb.Client // the zero value uses the public endpoints
 
-	res, err := c.Updates(context.Background(), smapiweb.UpdateRequest{
-		GameVersion: "1.6.15",
-		Platform:    "Linux",
-		Mods: []smapiweb.InstalledMod{
-			{ID: "Pathoschild.ContentPatcher", UpdateKeys: []string{"Nexus:1915"}, Version: "2.0.0"},
-		},
-	})
-	if err != nil { // some batches failed; the results still hold the answered ones
-		log.Print(err)
-	}
-	for _, r := range res {
-		switch {
-		case !r.Known:
-			fmt.Println(r.ID, "unknown")
-		case r.Suggested != nil:
-			fmt.Println(r.ID, "can update to", r.Suggested.Version)
-		default:
-			fmt.Println(r.ID, "is current")
-		}
-	}
+ res, err := c.Updates(context.Background(), smapiweb.UpdateRequest{
+  GameVersion: "1.6.15",
+  Platform:    "Linux",
+  Mods: []smapiweb.InstalledMod{
+   {ID: "Pathoschild.ContentPatcher", UpdateKeys: []string{"Nexus:1915"}, Version: "2.0.0"},
+  },
+ })
+ if err != nil { // some batches failed; the results still hold the answered ones
+  log.Print(err)
+ }
+ for _, r := range res {
+  switch {
+  case !r.Known:
+   fmt.Println(r.ID, "unknown")
+  case r.Suggested != nil:
+   fmt.Println(r.ID, "can update to", r.Suggested.Version)
+  default:
+   fmt.Println(r.ID, "is current")
+  }
+ }
 
-	list, err := c.CompatList(context.Background())
-	if err != nil {
-		log.Fatal(err)
-	}
-	if e, ok := list.Lookup("Pathoschild.ContentPatcher", 1915); ok && e.BrokenOn("1.6.15") {
-		fmt.Println("broken:", e.Summary)
-	}
+ list, err := c.CompatList(context.Background())
+ if err != nil {
+  log.Fatal(err)
+ }
+ if e, ok := list.Lookup("Pathoschild.ContentPatcher", 1915); ok && e.BrokenOn("1.6.15") {
+  fmt.Println("broken:", e.Summary)
+ }
 }
 ```
 
@@ -74,7 +74,7 @@ no real service.
 
 ## Requirements
 
-Go 1.27.3 or newer, plus `lefthook` and `gitleaks` on PATH if you want the git hooks.
+Go 1.27.4 or newer, plus `lefthook` and `gitleaks` on PATH if you want the git hooks.
 
 ```bash
 lefthook install
