@@ -151,6 +151,25 @@ func TestCompatStatusDefaultsFollowTheSchema(t *testing.T) {
 	}
 }
 
+func TestCompatLookupDropsSharedNexusPages(t *testing.T) {
+	idx, err := parseCompatJSON([]byte(`[
+	  {"id":"A.One","nexus":10,"status":"broken"},
+	  {"id":"B.Two","nexus":10,"status":"ok"}
+	]`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, ok := idx.Lookup("", 10); ok {
+		t.Fatal("a page of two mods names no compatibility")
+	}
+	if e, ok := idx.Lookup("A.One", 10); !ok || e.Status != StatusBroken {
+		t.Fatalf("A.One: %+v %v", e, ok)
+	}
+	if e, ok := idx.Lookup("B.Two", 10); !ok || e.Status != StatusOK {
+		t.Fatalf("B.Two: %+v %v", e, ok)
+	}
+}
+
 func TestCompatIndexTiesRefsToAUniqueIDUnlessAmbiguous(t *testing.T) {
 	idx, err := parseCompatJSON([]byte(`[
 	  {"id":"A.One","nexus":10,"github":"Me/One","status":"ok"},

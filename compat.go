@@ -141,6 +141,7 @@ func parseCompatJSON(b []byte) (CompatIndex, error) {
 		NexusToID:  map[int]string{},
 		GitHubToID: map[string]string{},
 	}
+	droppedNexus := map[int]bool{}
 	for _, raw := range mods {
 		ids := uniqueIDsOf(raw)
 		nexus := int(raw.NexusID)
@@ -161,8 +162,13 @@ func parseCompatJSON(b []byte) (CompatIndex, error) {
 		for _, id := range ids {
 			idx.ByID[strings.ToLower(id)] = e
 		}
-		if nexus > 0 {
-			idx.ByNexus[nexus] = e
+		if nexus > 0 && !droppedNexus[nexus] {
+			if prev, ok := idx.ByNexus[nexus]; ok && prev != e {
+				delete(idx.ByNexus, nexus)
+				droppedNexus[nexus] = true
+			} else {
+				idx.ByNexus[nexus] = e
+			}
 		}
 	}
 	dropAmbiguous(idx.NexusToID)
