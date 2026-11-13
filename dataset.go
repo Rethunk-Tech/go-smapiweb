@@ -100,7 +100,7 @@ func parseIndex(b []byte) (map[string][]Ref, error) {
 		for _, k := range keys {
 			site, num, ok := strings.Cut(string(k), ":")
 			n, err := strconv.Atoi(num)
-			if !ok || err != nil || site == "" {
+			if !ok || err != nil || n <= 0 || site == "" {
 				continue
 			}
 			ref := Ref{Site: site, ID: n}
