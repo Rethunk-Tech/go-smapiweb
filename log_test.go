@@ -107,7 +107,7 @@ func TestUploadLogStatusErrorIsTyped(t *testing.T) {
 }
 
 func TestUploadLogRefusesARedirectAwayFromLogPages(t *testing.T) {
-	for _, loc := range []string{"", "/elsewhere", "/log/", "/log/a/b"} {
+	for _, loc := range []string{"", "/elsewhere", "/log/", "/log/a/b", "/log/..", "/log/."} {
 		c := logClient(t, func(w http.ResponseWriter, _ *http.Request) {
 			if loc != "" {
 				w.Header().Set("Location", loc)
