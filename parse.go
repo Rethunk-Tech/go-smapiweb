@@ -6,6 +6,16 @@ import (
 	"strings"
 )
 
+// unmarshalLenient is json.Unmarshal that keeps what decoded when a struct field has the wrong type; syntax errors
+// and a value of the wrong shape for v itself are still errors.
+func unmarshalLenient(b []byte, v any) error {
+	err := json.Unmarshal(b, v)
+	if te, ok := errors.AsType[*json.UnmarshalTypeError](err); ok && te.Field != "" {
+		return nil
+	}
+	return err
+}
+
 // text accepts a string, a number (kept as written) or anything else (empty).
 type text string
 
@@ -86,10 +96,8 @@ type rawPage struct {
 // (which json reports as an error after decoding the rest, so the partial result is kept).
 func parsePage(b []byte) (Page, error) {
 	var r rawPage
-	if err := json.Unmarshal(b, &r); err != nil {
-		if _, ok := errors.AsType[*json.UnmarshalTypeError](err); !ok {
-			return Page{}, err
-		}
+	if err := unmarshalLenient(b, &r); err != nil {
+		return Page{}, err
 	}
 	p := Page{ID: int(r.ID), Name: string(r.Name), Author: string(r.Author), PageURL: webURL(string(r.PageURL)), Version: string(r.Version)}
 	for _, d := range r.Downloads {

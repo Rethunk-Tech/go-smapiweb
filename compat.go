@@ -194,14 +194,14 @@ func dropAmbiguous[K comparable](m map[K]string) {
 
 func decodeCompatMods(b []byte) ([]rawCompatMod, error) {
 	var mods []rawCompatMod
-	if json.Unmarshal(b, &mods) == nil && (len(mods) > 0 || bytes.Equal(bytes.TrimSpace(b), []byte("[]"))) {
+	if unmarshalLenient(b, &mods) == nil && (len(mods) > 0 || bytes.Equal(bytes.TrimSpace(b), []byte("[]"))) {
 		return mods, nil
 	}
 	var wrap struct {
 		Mods []rawCompatMod `json:"mods"`
 		Data []rawCompatMod `json:"data"`
 	}
-	if err := json.Unmarshal(b, &wrap); err != nil {
+	if err := unmarshalLenient(b, &wrap); err != nil {
 		return nil, err
 	}
 	if len(wrap.Mods) > 0 {

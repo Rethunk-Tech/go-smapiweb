@@ -242,3 +242,33 @@ func TestReplacementOfReadsEveryShapeTheListUses(t *testing.T) {
 		}
 	}
 }
+
+func TestCompatListKeepsRowsAroundAWrongTypedField(t *testing.T) {
+	idx, err := parseCompatJSON([]byte(`[{"id":"A.One","summary":["x"],"compatibility":{"status":"broken"}},{"id":"B.Two","compatibility":{"status":"ok"}}]`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if idx.ByID["a.one"].Status != StatusBroken || idx.ByID["b.two"].Status != StatusOK {
+		t.Errorf("ByID = %+v", idx.ByID)
+	}
+}
+
+func TestUpdateAnswersKeepModsAroundAWrongTypedField(t *testing.T) {
+	got, err := decodeUpdateAnswers([]byte(`[{"id":"A.One","metadata":{"brokeIn":5}},{"id":"B.Two","suggestedUpdate":{"version":"2.0","url":"https://x.test"}}]`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got["b.two"].Suggested == nil || got["a.one"].ID != "A.One" {
+		t.Errorf("got = %+v", got)
+	}
+}
+
+func TestParseIndexRefusesNonPositivePages(t *testing.T) {
+	idx, err := parseIndex([]byte(`{"A.One":["Nexus:-5","Nexus:0","Nexus:7"]}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(idx["a.one"]) != 1 || idx["a.one"][0].ID != 7 {
+		t.Errorf("refs = %+v", idx["a.one"])
+	}
+}
