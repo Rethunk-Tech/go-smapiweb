@@ -12,7 +12,7 @@ tool (
 
 require (
 	github.com/Rethunk-Tech/go-httpkit v0.3.1
-	github.com/Rethunk-Tech/go-lenientjson v0.1.1
+	github.com/Rethunk-Tech/go-lenientjson v0.2.0
 	github.com/Rethunk-Tech/go-semverish v0.3.0
 )
 

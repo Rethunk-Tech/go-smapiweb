@@ -42,8 +42,8 @@ github.com/OpenPeeDeeP/depguard/v2 v2.2.1 h1:vckeWVESWp6Qog7UZSARNqfu/cZqvki8zsu
 github.com/OpenPeeDeeP/depguard/v2 v2.2.1/go.mod h1:q4DKzC4UcVaAvcfd41CZh0PWpGgzrVxUYBlgKNGquUo=
 github.com/Rethunk-Tech/go-httpkit v0.3.1 h1:TEMOQ488ENSWf4wAGtBkfIyWxUDrtcsM0WOTuRg0abM=
 github.com/Rethunk-Tech/go-httpkit v0.3.1/go.mod h1:VSo/w8IjHfEn+3P6OW/9513buuzPpWHE7aBbcm8FiJ0=
-github.com/Rethunk-Tech/go-lenientjson v0.1.1 h1:3iBcn3kiAAYYNKImeO668SNuS7yZM6zs+uyu43f5qyc=
-github.com/Rethunk-Tech/go-lenientjson v0.1.1/go.mod h1:+6QT1mGJ7U/dlWFoUFwsQv71NQuEXSfMH5YDVIw5bpQ=
+github.com/Rethunk-Tech/go-lenientjson v0.2.0 h1:XoquACgmhfZTvcWRXEHObYRqsmnIPwzOIAG8PKo07jA=
+github.com/Rethunk-Tech/go-lenientjson v0.2.0/go.mod h1:9GGcETZ/RhQFnodQLe87O5+/AJmNCSdqr8iCPIVvFqI=
 github.com/Rethunk-Tech/go-safefs v0.9.1 h1:HfiNmSu4IGQVjDTTGeLOqCl4Xs45gyUcHKX+5PznJ18=
 github.com/Rethunk-Tech/go-safefs v0.9.1/go.mod h1:Kr+UKsuC4mKE4Ec986hwHqqOSz2JqYDdQil10zlQMhw=
 github.com/Rethunk-Tech/go-semverish v0.3.0 h1:9jo7H1hygsn73axSLqBzaqEOFwUIy2jsEzPQbASmVQg=
