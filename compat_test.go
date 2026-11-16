@@ -243,6 +243,38 @@ func TestReplacementOfReadsEveryShapeTheListUses(t *testing.T) {
 	}
 }
 
+func TestReplacementOfKeepsOnlyWebURLs(t *testing.T) {
+	t.Parallel()
+	for raw, want := range map[string]string{
+		`{"url":"javascript:alert(1)"}`:                  "",
+		`{"url":"file:///etc/passwd"}`:                   "",
+		`"javascript:alert(1)"`:                          "",
+		`["file:///etc/passwd"]`:                         "",
+		`{"name":"New Mod","url":"javascript:alert(1)"}`: "New Mod",
+		`{"url":"https://example.com/x"}`:                "https://example.com/x",
+		`"Author.New"`:                                   "Author.New",
+	} {
+		if got := replacementOf(json.RawMessage(raw)); got != want {
+			t.Errorf("%s: %q, want %q", raw, got, want)
+		}
+	}
+}
+
+func TestParseCompatJSONDropsNonWebReplacementURLs(t *testing.T) {
+	idx, err := parseCompatJSON([]byte(`[
+	  {"id":"A.Script","status":"obsolete","replacement":{"url":"javascript:alert(1)"}},
+	  {"id":"A.File","status":"obsolete","successor":{"url":"file:///etc/passwd"}}
+	]`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, id := range []string{"A.Script", "A.File"} {
+		if e, ok := idx.Lookup(id, 0); !ok || e.Replacement != "" {
+			t.Errorf("%s: %+v %v", id, e, ok)
+		}
+	}
+}
+
 func TestCompatListKeepsRowsAroundAWrongTypedField(t *testing.T) {
 	idx, err := parseCompatJSON([]byte(`[{"id":"A.One","summary":["x"],"compatibility":{"status":"broken"}},{"id":"B.Two","compatibility":{"status":"ok"}}]`))
 	if err != nil {

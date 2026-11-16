@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 
@@ -373,7 +374,7 @@ func replacementOf(raw json.RawMessage) string {
 	}
 	var s string
 	if json.Unmarshal(raw, &s) == nil {
-		return strings.TrimSpace(s)
+		return replacementText(s)
 	}
 	var obj struct {
 		Name string `json:"name"`
@@ -381,15 +382,25 @@ func replacementOf(raw json.RawMessage) string {
 		URL  string `json:"url"`
 	}
 	if json.Unmarshal(raw, &obj) == nil {
-		for _, v := range []string{obj.Name, obj.ID, obj.URL} {
-			if strings.TrimSpace(v) != "" {
-				return strings.TrimSpace(v)
+		for _, v := range []string{replacementText(obj.Name), replacementText(obj.ID), webURL(obj.URL)} {
+			if v != "" {
+				return v
 			}
 		}
 	}
 	var many []string
 	if json.Unmarshal(raw, &many) == nil && len(many) > 0 {
-		return strings.TrimSpace(many[0])
+		return replacementText(many[0])
 	}
 	return ""
+}
+
+// replacementText keeps the name or id of another mod as written, but a URL only when it is a web address: the field
+// is remote data a caller may hand to a URL handler.
+func replacementText(s string) string {
+	s = strings.TrimSpace(s)
+	if u, err := url.Parse(s); err == nil && u.Scheme != "" {
+		return webURL(s)
+	}
+	return s
 }
