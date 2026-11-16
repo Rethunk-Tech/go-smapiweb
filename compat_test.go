@@ -253,6 +253,7 @@ func TestReplacementOfKeepsOnlyWebURLs(t *testing.T) {
 		`{"name":"New Mod","url":"javascript:alert(1)"}`: "New Mod",
 		`{"url":"https://example.com/x"}`:                "https://example.com/x",
 		`"Author.New"`:                                   "Author.New",
+		"\"java\\tscript:alert(1)\"":                     "",
 	} {
 		if got := replacementOf(json.RawMessage(raw)); got != want {
 			t.Errorf("%s: %q, want %q", raw, got, want)

@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"unicode"
 
 	"github.com/Rethunk-Tech/go-lenientjson"
 	"github.com/Rethunk-Tech/go-semverish"
@@ -399,6 +400,11 @@ func replacementOf(raw json.RawMessage) string {
 // is remote data a caller may hand to a URL handler.
 func replacementText(s string) string {
 	s = strings.TrimSpace(s)
+	// Browsers drop tabs and newlines inside a scheme, so "java\tscript:" is a script URL that url.Parse rejects
+	// instead of recognising.
+	if strings.ContainsFunc(s, unicode.IsControl) {
+		return ""
+	}
 	if u, err := url.Parse(s); err == nil && u.Scheme != "" {
 		return webURL(s)
 	}
