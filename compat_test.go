@@ -263,6 +263,24 @@ func TestUpdateAnswersKeepModsAroundAWrongTypedField(t *testing.T) {
 	}
 }
 
+func TestParseCompatJSONRefusesAMalformedDocument(t *testing.T) {
+	for _, body := range []string{`{"mods":"garbage"}`, `{"mods":1}`, `[1,2]`, `{}`} {
+		if idx, err := parseCompatJSON([]byte(body)); err == nil {
+			t.Errorf("%s: err = nil with %+v", body, idx)
+		}
+	}
+}
+
+func TestParseCompatJSONSkipsOneMalformedEntry(t *testing.T) {
+	idx, err := parseCompatJSON([]byte(`[{"id":"A.One","compatibility":{"status":"ok"}},7]`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(idx.ByID) != 1 || idx.ByID["a.one"].Status != StatusOK {
+		t.Errorf("ByID = %+v", idx.ByID)
+	}
+}
+
 func TestParseIndexRefusesNonPositivePages(t *testing.T) {
 	idx, err := parseIndex([]byte(`{"A.One":["Nexus:-5","Nexus:0","Nexus:7"]}`))
 	if err != nil {

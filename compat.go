@@ -1,10 +1,10 @@
 package smapiweb
 
 import (
-	"bytes"
 	"cmp"
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strconv"
 	"strings"
@@ -192,22 +192,49 @@ func dropAmbiguous[K comparable](m map[K]string) {
 	}
 }
 
+// decodeCompatMods reads the list's entries from a bare array or a {"mods"} / {"data"} wrapper. A document that
+// names neither, or whose entries are all the wrong shape, is an error; one unreadable entry among readable ones is
+// skipped.
 func decodeCompatMods(b []byte) ([]rawCompatMod, error) {
-	var mods []rawCompatMod
-	if unmarshalLenient(b, &mods) == nil && (len(mods) > 0 || bytes.Equal(bytes.TrimSpace(b), []byte("[]"))) {
-		return mods, nil
+	var elems []json.RawMessage
+	if err := json.Unmarshal(b, &elems); err == nil {
+		return compatModsOf(elems)
 	}
 	var wrap struct {
-		Mods []rawCompatMod `json:"mods"`
-		Data []rawCompatMod `json:"data"`
+		Mods json.RawMessage `json:"mods"`
+		Data json.RawMessage `json:"data"`
 	}
-	if err := unmarshalLenient(b, &wrap); err != nil {
+	if err := json.Unmarshal(b, &wrap); err != nil {
 		return nil, err
 	}
-	if len(wrap.Mods) > 0 {
-		return wrap.Mods, nil
+	list := wrap.Mods
+	if len(list) == 0 {
+		list = wrap.Data
 	}
-	return wrap.Data, nil
+	if len(list) == 0 {
+		return nil, errors.New("the compatibility list names no mods")
+	}
+	if err := json.Unmarshal(list, &elems); err != nil {
+		return nil, err
+	}
+	return compatModsOf(elems)
+}
+
+func compatModsOf(elems []json.RawMessage) ([]rawCompatMod, error) {
+	if elems == nil {
+		return nil, errors.New("the compatibility list names no mods")
+	}
+	mods := make([]rawCompatMod, 0, len(elems))
+	for _, e := range elems {
+		var m rawCompatMod
+		if unmarshalLenient(e, &m) == nil {
+			mods = append(mods, m)
+		}
+	}
+	if len(elems) > 0 && len(mods) == 0 {
+		return nil, errors.New("no entry in the compatibility list is a mod")
+	}
+	return mods, nil
 }
 
 func entryFromRaw(raw rawCompatMod) CompatEntry {
