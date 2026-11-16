@@ -275,6 +275,21 @@ func TestParseCompatJSONDropsNonWebReplacementURLs(t *testing.T) {
 	}
 }
 
+func TestCompatStatusInfersUnofficialFromVersion(t *testing.T) {
+	idx, err := parseCompatJSON([]byte(`{"mods":[
+	  {"id":"A.Version","unofficialUpdate":{"version":"1.2.3-unofficial.1-x"}},
+	  {"id":"A.NonWeb","unofficialUpdate":{"url":"javascript:alert(1)","version":"1.0.0-unofficial"}}]}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, id := range []string{"A.Version", "A.NonWeb"} {
+		e, ok := idx.Lookup(id, 0)
+		if !ok || e.Status != StatusUnofficial || e.UnofficialVersion == "" || e.UnofficialURL != "" {
+			t.Errorf("%s: %+v %v", id, e, ok)
+		}
+	}
+}
+
 func TestCompatListKeepsRowsAroundAWrongTypedField(t *testing.T) {
 	idx, err := parseCompatJSON([]byte(`[{"id":"A.One","summary":["x"],"compatibility":{"status":"broken"}},{"id":"B.Two","compatibility":{"status":"ok"}}]`))
 	if err != nil {

@@ -263,7 +263,7 @@ func entryFromRaw(raw rawCompatMod) CompatEntry {
 	// The list's schema leaves status out when it follows from the other fields.
 	if e.Status == "" {
 		switch {
-		case e.UnofficialURL != "":
+		case e.UnofficialURL != "" || e.UnofficialVersion != "":
 			e.Status = StatusUnofficial
 		case e.BrokeIn != "":
 			e.Status = StatusBroken
