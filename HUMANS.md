@@ -62,7 +62,8 @@ no real service.
 | --- | --- |
 | `Updates` | One result per mod, in request order, with the request's ID. `Known` is true only for a mod whose batch was answered; a mod the API does not list is `Known` with no `Suggested`. The error is `errors.Join` of the failed batches' errors in batch order; it is nil only when every batch was answered. |
 | `Updates` batching | 100 mods a batch, four at a time; a failed batch is asked again in two halves; after a failed batch, batches not yet sent are not sent. |
-| `CompatList` | Parses every published shape of the list; a status the list leaves out is inferred; a malformed entry is skipped, a malformed document is an error. |
+| `CompatList` | Parses every published shape of the list; a status the list leaves out is inferred; an unreadable entry among readable ones is skipped; a malformed document is an error. |
+| `CompatEntry.Status` | `ok` (`ok`, `compatible`), `optional`, `unofficial`, `broken` (`broken`, `workaround`), `obsolete`, `abandoned`, `unknown` (any other non-empty status). `RawStatus` keeps the list's text. |
 | `CompatIndex.Lookup` | UniqueID (any case) first, then Nexus page id. |
 | `CompatEntry.BrokenOn` | A break in a later game version is not a break; an unparseable version is. |
 | `Index` | Keys are lowercased UniqueIDs; an index with no usable entry is an error. |

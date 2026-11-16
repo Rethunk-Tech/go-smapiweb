@@ -31,6 +31,8 @@ type CompatEntry struct {
 	// UnofficialVersion is the version of the unofficial update, so an install at or past it is not flagged.
 	UnofficialVersion string `json:"unofficialVersion"`
 	Replacement       string `json:"replacement"`
+	// RawStatus is the list's status text before mapping, so an unknown value is still visible.
+	RawStatus string `json:"-"`
 }
 
 // CompatIndex maps UniqueID (lowercased) and Nexus page id onto the same entry.
@@ -242,6 +244,7 @@ func compatModsOf(elems []json.RawMessage) ([]rawCompatMod, error) {
 func entryFromRaw(raw rawCompatMod) CompatEntry {
 	e := CompatEntry{
 		Status:        normalizeCompatStatus(raw.Status),
+		RawStatus:     strings.TrimSpace(raw.Status),
 		Summary:       strings.TrimSpace(raw.Summary),
 		BrokeIn:       strings.TrimSpace(raw.BrokeIn),
 		UnofficialURL: webURL(raw.UnofficialURL),
@@ -282,6 +285,9 @@ func applyCompatibility(e *CompatEntry, raw json.RawMessage) {
 	}
 	var nested rawCompatBody
 	if json.Unmarshal(raw, &nested) == nil && (nested.Status != "" || nested.Summary != "") {
+		if nested.Status != "" {
+			e.RawStatus = strings.TrimSpace(nested.Status)
+		}
 		if s := normalizeCompatStatus(nested.Status); s != "" {
 			e.Status = s
 		}
@@ -302,6 +308,7 @@ func applyCompatibility(e *CompatEntry, raw json.RawMessage) {
 		if json.Unmarshal(raw, &status) == nil {
 			if s := normalizeCompatStatus(status); s != "" {
 				e.Status = s
+				e.RawStatus = strings.TrimSpace(status)
 			}
 		}
 	}
@@ -314,6 +321,7 @@ const (
 	StatusBroken     = "broken"
 	StatusObsolete   = "obsolete"
 	StatusAbandoned  = "abandoned"
+	StatusUnknown    = "unknown"
 )
 
 func normalizeCompatStatus(s string) string {
@@ -334,7 +342,10 @@ func normalizeCompatStatus(s string) string {
 	case "abandoned":
 		return StatusAbandoned
 	default:
-		return ""
+		if strings.TrimSpace(s) == "" {
+			return ""
+		}
+		return StatusUnknown
 	}
 }
 
