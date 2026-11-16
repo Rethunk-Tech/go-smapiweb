@@ -224,6 +224,9 @@ func decodeUpdateAnswers(b []byte) (map[string]UpdateResult, error) {
 	}
 	out := make(map[string]UpdateResult, len(answers))
 	for _, a := range answers {
+		if strings.TrimSpace(a.ID) == "" {
+			return nil, errors.New("an update answer names no mod")
+		}
 		r := UpdateResult{ID: a.ID, Known: true, Suggested: a.SuggestedUpdate.asUpdate()}
 		if a.Metadata != nil {
 			r.Compatibility = a.Metadata.CompatibilityStatus

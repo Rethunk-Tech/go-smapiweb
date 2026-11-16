@@ -6,14 +6,21 @@ import (
 	"strings"
 )
 
-// unmarshalLenient is json.Unmarshal that keeps what decoded when a struct field has the wrong type; syntax errors
-// and a value of the wrong shape for v itself are still errors.
+// unmarshalLenient is json.Unmarshal that keeps what decoded when an object's field has the wrong type; syntax
+// errors, a value of the wrong shape for v itself and an array element that is not an object are still errors.
 func unmarshalLenient(b []byte, v any) error {
 	err := json.Unmarshal(b, v)
-	if te, ok := errors.AsType[*json.UnmarshalTypeError](err); ok && te.Field != "" {
+	if te, ok := errors.AsType[*json.UnmarshalTypeError](err); ok && atStructField(te.Field) {
 		return nil
 	}
 	return err
+}
+
+// atStructField reports whether the type error names a field inside an object. A path whose last segment is an
+// array index names the element itself, so nothing of that record decoded to keep.
+func atStructField(path string) bool {
+	last := path[strings.LastIndexByte(path, '.')+1:]
+	return strings.ContainsFunc(last, func(r rune) bool { return r < '0' || r > '9' })
 }
 
 // text accepts a string, a number (kept as written) or anything else (empty).

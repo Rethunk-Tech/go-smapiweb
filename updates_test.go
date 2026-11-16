@@ -41,6 +41,22 @@ func TestUpdatesRealAnswer(t *testing.T) {
 	}
 }
 
+func TestUpdateAnswersRefuseABodyThatIsNotAListOfAnswers(t *testing.T) {
+	for _, body := range []string{`[1,2,3]`, `[{"id":1}]`, `[{}]`} {
+		if got, err := decodeUpdateAnswers([]byte(body)); err == nil {
+			t.Errorf("%s: err = nil with %+v", body, got)
+		}
+	}
+}
+
+func TestUpdatesErrorsOnABodyThatIsNotAListOfAnswers(t *testing.T) {
+	c := updatesClient(t, func(w http.ResponseWriter, _ *http.Request) { _, _ = w.Write([]byte(`[1,2,3]`)) })
+	got, err := c.Updates(t.Context(), UpdateRequest{Mods: []InstalledMod{{ID: "A.Mod"}}})
+	if err == nil || len(got) != 1 || got[0].Known || got[0].ID != "A.Mod" {
+		t.Fatalf("got %+v, err %v", got, err)
+	}
+}
+
 func TestUpdatesReadsCompatibilitySummary(t *testing.T) {
 	t.Parallel()
 	c := updatesClient(t, func(w http.ResponseWriter, _ *http.Request) {
