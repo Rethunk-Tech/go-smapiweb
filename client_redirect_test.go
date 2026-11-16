@@ -1,7 +1,6 @@
 package smapiweb
 
 import (
-	"context"
 	"errors"
 	"net/http"
 	"net/http/httptest"
@@ -34,7 +33,7 @@ func TestDoRedirectOrigin(t *testing.T) {
 	defer origin.Close()
 
 	c := &Client{CompatURL: origin.URL + "/same"}
-	idx, err := c.CompatList(context.Background())
+	idx, err := c.CompatList(t.Context())
 	if err != nil {
 		t.Fatalf("same-origin redirect: %v", err)
 	}
@@ -43,7 +42,7 @@ func TestDoRedirectOrigin(t *testing.T) {
 	}
 
 	c.CompatURL = origin.URL + "/cross"
-	idx, err = c.CompatList(context.Background())
+	idx, err = c.CompatList(t.Context())
 	var redir *CrossOriginRedirectError
 	if !errors.As(err, &redir) {
 		t.Fatalf("cross-origin redirect: got idx=%+v err=%v", idx, err)
