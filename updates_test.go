@@ -49,6 +49,13 @@ func TestUpdateAnswersRefuseABodyThatIsNotAListOfAnswers(t *testing.T) {
 	}
 }
 
+func TestUpdateAnswersSkipAnEntryWithoutAnID(t *testing.T) {
+	got, err := decodeUpdateAnswers([]byte(`[{},{"id":"A.Mod"}]`))
+	if err != nil || len(got) != 1 || !got["a.mod"].Known {
+		t.Fatalf("got %+v, err %v", got, err)
+	}
+}
+
 func TestUpdatesErrorsOnABodyThatIsNotAListOfAnswers(t *testing.T) {
 	c := updatesClient(t, func(w http.ResponseWriter, _ *http.Request) { _, _ = w.Write([]byte(`[1,2,3]`)) })
 	got, err := c.Updates(t.Context(), UpdateRequest{Mods: []InstalledMod{{ID: "A.Mod"}}})

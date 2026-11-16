@@ -225,7 +225,7 @@ func decodeUpdateAnswers(b []byte) (map[string]UpdateResult, error) {
 	out := make(map[string]UpdateResult, len(answers))
 	for _, a := range answers {
 		if strings.TrimSpace(a.ID) == "" {
-			return nil, errors.New("an update answer names no mod")
+			continue
 		}
 		r := UpdateResult{ID: a.ID, Known: true, Suggested: a.SuggestedUpdate.asUpdate()}
 		if a.Metadata != nil {
@@ -238,6 +238,9 @@ func decodeUpdateAnswers(b []byte) (map[string]UpdateResult, error) {
 			r.Unofficial = firstUnofficial(a.SuggestedUpdate.Unofficial, a.SuggestedUpdate.UnofficialForSmapi)
 		}
 		out[strings.ToLower(a.ID)] = r
+	}
+	if len(answers) > 0 && len(out) == 0 {
+		return nil, errors.New("no update answer names a mod")
 	}
 	return out, nil
 }
