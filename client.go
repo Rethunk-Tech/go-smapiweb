@@ -44,16 +44,29 @@ func webURL(raw string) string {
 	return raw
 }
 
-// redirectPolicy follows httpkit.NoDowngrade, and refuses a 307 or 308 to another origin: those re-send the request
-// body, which for the update API is the player's installed-mod list.
+// CrossOriginRedirectError is a redirect whose target is not the request's scheme, host and port.
+type CrossOriginRedirectError struct {
+	URL string
+}
+
+func (e *CrossOriginRedirectError) Error() string {
+	return "redirected to " + e.URL
+}
+
+// redirectPolicy follows httpkit.NoDowngrade and same-origin redirects only: a cross-origin 301/302 would
+// otherwise be followed and its body trusted as the requested host's.
 func redirectPolicy(req *http.Request, via []*http.Request) error {
 	if err := httpkit.NoDowngrade(req, via); err != nil {
 		return err
 	}
-	if code := req.Response.StatusCode; (code == http.StatusTemporaryRedirect || code == http.StatusPermanentRedirect) && req.GetBody != nil {
-		return httpkit.SameOrigin(req, via)
+	if len(via) == 0 {
+		return nil
 	}
-	return nil
+	from, to := via[0].URL, req.URL
+	if from.Scheme == to.Scheme && from.Host == to.Host {
+		return nil
+	}
+	return &CrossOriginRedirectError{URL: to.String()}
 }
 
 // do sends req and returns at most limit bytes of a 200 response body, under requestTimeout. check is nil: none of
