@@ -416,9 +416,16 @@ func replacementText(s string) string {
 	if strings.ContainsFunc(s, unicode.IsControl) {
 		return ""
 	}
-	// A host without a scheme is //host, which a URL handler resolves against http(s).
-	if u, err := url.Parse(s); err == nil && (u.Scheme != "" || u.Host != "") {
+	if u, err := url.Parse(s); err != nil {
+		return ""
+	} else if u.Scheme != "" || u.Host != "" {
+		// A host without a scheme is //host, which a URL handler resolves against http(s).
 		return webURL(s)
+	}
+	// Anything starting // or \\ or /\ is a network-path reference a URL handler resolves against its base, so it is
+	// not the name or id it looks like even when the parser refused to call it a URL.
+	if len(s) > 1 && (s[0] == '/' || s[0] == '\\') && (s[1] == '/' || s[1] == '\\') {
+		return ""
 	}
 	return s
 }

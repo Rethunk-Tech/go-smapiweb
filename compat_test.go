@@ -264,6 +264,15 @@ func TestReplacementOfKeepsOnlyWebURLs(t *testing.T) {
 	}
 }
 
+func TestReplacementTextDropsUnparseableAndNetworkPathValues(t *testing.T) {
+	t.Parallel()
+	for _, s := range []string{`//evil.example/%zz`, `\\evil.example/x`, `/\evil.example/x`, `\/evil.example/x`} {
+		if got := replacementText(s); got != "" {
+			t.Errorf("%q: %q, want empty", s, got)
+		}
+	}
+}
+
 func TestParseCompatJSONDropsNonWebReplacementURLs(t *testing.T) {
 	idx, err := parseCompatJSON([]byte(`[
 	  {"id":"A.Script","status":"obsolete","replacement":{"url":"javascript:alert(1)"}},
