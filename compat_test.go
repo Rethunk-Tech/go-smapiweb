@@ -266,9 +266,16 @@ func TestReplacementOfKeepsOnlyWebURLs(t *testing.T) {
 
 func TestReplacementTextDropsUnparseableAndNetworkPathValues(t *testing.T) {
 	t.Parallel()
-	for _, s := range []string{`//evil.example/%zz`, `\\evil.example/x`, `/\evil.example/x`, `\/evil.example/x`} {
-		if got := replacementText(s); got != "" {
-			t.Errorf("%q: %q, want empty", s, got)
+	for _, tc := range []struct{ in, want string }{
+		{`//evil.example/%zz`, ""},
+		{`\\evil.example/x`, ""},
+		{`/\evil.example/x`, ""},
+		{`\/evil.example/x`, ""},
+		{"Better Chests: Reloaded", "Better Chests: Reloaded"},
+		{"100% Winter", "100% Winter"},
+	} {
+		if got := replacementText(tc.in); got != tc.want {
+			t.Errorf("%q: %q, want %q", tc.in, got, tc.want)
 		}
 	}
 }

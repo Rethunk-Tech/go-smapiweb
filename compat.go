@@ -417,7 +417,13 @@ func replacementText(s string) string {
 		return ""
 	}
 	if u, err := url.Parse(s); err != nil {
-		return ""
+		// url.Parse rejects a name with a colon that is not a scheme ("Better Chests: Reloaded") or with a bare
+		// percent ("100% Winter"); those are still names. A leading slash or backslash is a path or network-path
+		// even when the parser refused it.
+		if s == "" || s[0] == '/' || s[0] == '\\' {
+			return ""
+		}
+		return s
 	} else if u.Scheme != "" || u.Host != "" {
 		// A host without a scheme is //host, which a URL handler resolves against http(s).
 		return webURL(s)
