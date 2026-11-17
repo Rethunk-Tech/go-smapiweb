@@ -416,7 +416,8 @@ func replacementText(s string) string {
 	if strings.ContainsFunc(s, unicode.IsControl) {
 		return ""
 	}
-	if u, err := url.Parse(s); err == nil && u.Scheme != "" {
+	// A host without a scheme is //host, which a URL handler resolves against http(s).
+	if u, err := url.Parse(s); err == nil && (u.Scheme != "" || u.Host != "") {
 		return webURL(s)
 	}
 	return s

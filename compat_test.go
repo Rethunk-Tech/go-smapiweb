@@ -254,6 +254,9 @@ func TestReplacementOfKeepsOnlyWebURLs(t *testing.T) {
 		`{"url":"https://example.com/x"}`:                "https://example.com/x",
 		`"Author.New"`:                                   "Author.New",
 		"\"java\\tscript:alert(1)\"":                     "",
+		`"//evil.example/mod"`:                           "",
+		`{"name":"//evil.example/mod"}`:                  "",
+		`["//evil.example/mod"]`:                         "",
 	} {
 		if got := replacementOf(json.RawMessage(raw)); got != want {
 			t.Errorf("%s: %q, want %q", raw, got, want)
@@ -264,12 +267,13 @@ func TestReplacementOfKeepsOnlyWebURLs(t *testing.T) {
 func TestParseCompatJSONDropsNonWebReplacementURLs(t *testing.T) {
 	idx, err := parseCompatJSON([]byte(`[
 	  {"id":"A.Script","status":"obsolete","replacement":{"url":"javascript:alert(1)"}},
-	  {"id":"A.File","status":"obsolete","successor":{"url":"file:///etc/passwd"}}
+	  {"id":"A.File","status":"obsolete","successor":{"url":"file:///etc/passwd"}},
+	  {"id":"A.Relative","status":"obsolete","successor":"//evil.example/mod"}
 	]`))
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, id := range []string{"A.Script", "A.File"} {
+	for _, id := range []string{"A.Script", "A.File", "A.Relative"} {
 		if e, ok := idx.Lookup(id, 0); !ok || e.Replacement != "" {
 			t.Errorf("%s: %+v %v", id, e, ok)
 		}
