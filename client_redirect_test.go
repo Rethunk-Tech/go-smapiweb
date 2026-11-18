@@ -63,7 +63,7 @@ func TestCrossOriginRedirectErrorNamesTheTarget(t *testing.T) {
 }
 
 func TestRedirectPolicyAllowsARequestWithNoPriorHop(t *testing.T) {
-	req, err := http.NewRequest(http.MethodGet, "https://smapi.io/api/v4.0.0/mods", nil)
+	req, err := http.NewRequestWithContext(t.Context(), http.MethodGet, "https://smapi.io/api/v4.0.0/mods", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
