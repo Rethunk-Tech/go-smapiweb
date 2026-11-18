@@ -48,6 +48,24 @@ func TestParseIndexSkipsOddEntries(t *testing.T) {
 	}
 }
 
+func TestParseIndexWithNoUsableEntryIsEmpty(t *testing.T) {
+	if _, err := parseIndex([]byte(`{"A":["junk"],"B":["Nexus:x"],"C":[]}`)); err == nil {
+		t.Fatal("an index with no Site:number entry is empty")
+	}
+}
+
+func TestIndexRejectsAMalformedURL(t *testing.T) {
+	if _, err := (&Client{IndexURL: "http://["}).Index(t.Context()); err == nil {
+		t.Fatal("a malformed IndexURL is an error")
+	}
+}
+
+func TestPageRejectsAMalformedBase(t *testing.T) {
+	if _, err := (&Client{PageBase: "http://["}).Page(t.Context(), 1); err == nil {
+		t.Fatal("a malformed PageBase is an error")
+	}
+}
+
 func TestPageRealFixture(t *testing.T) {
 	p, err := datasetServer(t).Page(t.Context(), 1915)
 	if err != nil {

@@ -54,3 +54,21 @@ func TestDoRedirectOrigin(t *testing.T) {
 		t.Fatal("parsed the refused redirect body")
 	}
 }
+
+func TestCrossOriginRedirectErrorNamesTheTarget(t *testing.T) {
+	err := &CrossOriginRedirectError{URL: "https://evil.example/pwn"}
+	if got := err.Error(); got != "redirected to https://evil.example/pwn" {
+		t.Fatalf("Error() = %q", got)
+	}
+}
+
+func TestRedirectPolicyAllowsARequestWithNoPriorHop(t *testing.T) {
+	req, err := http.NewRequest(http.MethodGet, "https://smapi.io/api/v4.0.0/mods", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// NoDowngrade reads via[0] only when the target is not https, so an https first hop is the reachable empty-via path.
+	if err := redirectPolicy(req, nil); err != nil {
+		t.Fatalf("empty via: %v", err)
+	}
+}
