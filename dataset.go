@@ -93,9 +93,8 @@ func parseIndex(b []byte) (map[string][]Ref, error) {
 	out := make(map[string][]Ref, len(raw))
 	for id, v := range raw {
 		var keys list
-		if json.Unmarshal(v, &keys) != nil {
-			continue
-		}
+		// list takes any JSON value and leaves a non-array empty, so this never fails.
+		_ = json.Unmarshal(v, &keys)
 		key := strings.ToLower(id)
 		for _, k := range keys {
 			site, num, ok := strings.Cut(string(k), ":")
