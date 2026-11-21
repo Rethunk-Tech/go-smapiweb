@@ -6,6 +6,8 @@ Notable changes to `go-smapiweb`. The format follows
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-21
+
 ### Fixed
 
 - A cross-origin HTTP redirect is refused.
@@ -36,6 +38,7 @@ Notable changes to `go-smapiweb`. The format follows
 - `Client.Index` and `Client.Page` read the StardewModDataset: which Nexus pages ship a UniqueID, and a page's files, manifests and dependencies. A page the dataset lacks is an empty `Page`.
 - `Client.CompatList` reads the SMAPI compatibility list in every shape it has been published in, into a `CompatIndex` with `Lookup` by UniqueID or Nexus page and `CompatEntry.BrokenOn` for a game version.
 
-[Unreleased]: https://github.com/Rethunk-Tech/go-smapiweb/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/Rethunk-Tech/go-smapiweb/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/Rethunk-Tech/go-smapiweb/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/Rethunk-Tech/go-smapiweb/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/Rethunk-Tech/go-smapiweb/releases/tag/v0.1.0
