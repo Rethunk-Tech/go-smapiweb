@@ -6,6 +6,15 @@ Notable changes to `go-smapiweb`. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- A cross-origin HTTP redirect is refused.
+- Replacement values are dropped when they are unparseable, network-path, protocol-relative, non-web or carry control characters; plain names `url.Parse` rejects are kept.
+- A compat document whose mods are the wrong shape is rejected, one wrong-typed field fails the whole compat list or update answer, and an unrecognised status maps to unknown, not ok.
+- Unofficial status is inferred from the version alone, `ByNexus` is dropped when a page names two mods, and `PageURL` goes through `webURL`.
+- An update answer body that is not a list is rejected, an answer without an id is skipped instead of failing the batch, and answers from a successful retry are kept.
+- `Index` keeps `Nexus:0` and negative page ids.
+
 ## [0.1.1] - 2026-11-07
 
 ### Fixed
