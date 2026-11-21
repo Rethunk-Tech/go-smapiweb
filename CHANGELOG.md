@@ -15,6 +15,10 @@ Notable changes to `go-smapiweb`. The format follows
 - An update answer body that is not a list is rejected, an answer without an id is skipped instead of failing the batch, and answers from a successful retry are kept.
 - `Index` keeps `Nexus:0` and negative page ids.
 
+### Added
+
+- `CompatEntry.RawStatus` keeps the status text as the API sent it, `StatusUnknown` marks one that is not recognised, and `CrossOriginRedirectError` is what a refused cross-origin redirect returns.
+
 ## [0.1.1] - 2026-11-07
 
 ### Fixed
